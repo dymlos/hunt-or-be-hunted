@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://djxabjks2aa"]
+
+[ext_resource type="Script" uid="uid://b3lsuqt4vyg7q" path="res://src/scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://bgbsm2gq6gga1" path="res://src/scripts/BulletPool.gd" id="2_pool"]
+[ext_resource type="Script" uid="uid://ciwp81vpv1ssw" path="res://src/scripts/Player.gd" id="3_player"]
+[ext_resource type="Texture2D" uid="uid://bsv22eigbimed" path="res://src/assets/white_sq.png.png" id="4_1hqvy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1hqvy"]
+radius = 20.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_w8f5i"]
+radius = 20.0
+
+[node name="Main" type="Node2D" unique_id=1467517605]
+script = ExtResource("1_main")
+
+[node name="BulletPool" type="Node" parent="." unique_id=2136551591]
+script = ExtResource("2_pool")
+
+[node name="Players" type="Node2D" parent="." unique_id=47832223]
+
+[node name="Player1" type="CharacterBody2D" parent="Players" unique_id=225177259]
+position = Vector2(300, 350)
+script = ExtResource("3_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player1" unique_id=1794941855]
+shape = SubResource("CircleShape2D_1hqvy")
+
+[node name="Sprite2D" type="Sprite2D" parent="Players/Player1" unique_id=523215367]
+modulate = Color(0.79607844, 0.1882353, 0.23921569, 1)
+rotation = 1.5707964
+scale = Vector2(3, 3)
+texture = ExtResource("4_1hqvy")
+
+[node name="BulletSpawn" type="Marker2D" parent="Players/Player1" unique_id=1123786089]
+position = Vector2(18, 0)
+
+[node name="Player2" type="CharacterBody2D" parent="Players" unique_id=1374073631]
+position = Vector2(900, 350)
+script = ExtResource("3_player")
+player_id = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player2" unique_id=210921206]
+shape = SubResource("CircleShape2D_w8f5i")
+
+[node name="Sprite2D" type="Sprite2D" parent="Players/Player2" unique_id=599477020]
+modulate = Color(0, 0.29803923, 0.84705883, 1)
+rotation = 1.5707964
+scale = Vector2(3, 3)
+texture = ExtResource("4_1hqvy")
+
+[node name="BulletSpawn" type="Marker2D" parent="Players/Player2" unique_id=1701456542]
+position = Vector2(18, 0)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2129126970]
+position = Vector2(600, 350)
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=200651081]
+
+[node name="UIRoot" type="Control" parent="UI" unique_id=1162751982]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/UIRoot" unique_id=625565364]
+z_index = -100
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.10980392, 0.23137255, 0.14509805, 0.14509805)
+
+[node name="ScoreLabel" type="Label" parent="UI/UIRoot" unique_id=987654321]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+text = "P1: 0  P2: 0"
+horizontal_alignment = 1
+
+[node name="WinnerLabel" type="Label" parent="UI/UIRoot" unique_id=123456789]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 48
+text = "PLAYER 1 WINS!"
+horizontal_alignment = 1
