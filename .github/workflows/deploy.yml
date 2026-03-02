@@ -17,22 +17,29 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Godot
+      - name: Setup Godot (Editor)
         uses: chickensoft-games/setup-godot@v2
         with:
           version: 4.6.0
-          include-templates: true
+
+      # Instala Export Templates a mano (evita dramas del action)
+      - name: Install Godot Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          curl -L -o templates.tpz https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_export_templates.tpz
+          mkdir -p /tmp/godot_templates
+          unzip -q templates.tpz -d /tmp/godot_templates
+          mkdir -p ~/.local/share/godot/export_templates/4.6.stable
+          mv /tmp/godot_templates/templates/* ~/.local/share/godot/export_templates/4.6.stable/
 
       - name: Export Web
-        working-directory: "Antigravity - HobH"
         run: |
           mkdir -p build/web
-          godot --headless --verbose --path . --export-release "Web" build/web/index.html
+          godot --headless --verbose --path "Antigravity - HobH" --export-release "Web" "../build/web/index.html"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -45,7 +52,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
