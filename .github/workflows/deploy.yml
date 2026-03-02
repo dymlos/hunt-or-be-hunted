@@ -15,44 +15,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Godot (Editor)
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.6.0
-
-      # Instala Export Templates a mano (evita dramas del action)
-      - name: Install Godot Export Templates
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          curl -L -o templates.tpz https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_export_templates.tpz
-          mkdir -p /tmp/godot_templates
-          unzip -q templates.tpz -d /tmp/godot_templates
-          mkdir -p ~/.local/share/godot/export_templates/4.6.stable
-          mv /tmp/godot_templates/templates/* ~/.local/share/godot/export_templates/4.6.stable/
-
-      - name: Export Web
-        run: |
-          mkdir -p build/web
-          godot --headless --verbose --path "Antigravity - HobH" --export-release "Web" "../build/web/index.html"
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/web
-
-  deploy:
-    needs: build
+  export-and-deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # IMPORTANT: Use NON-.NET Godot build + templates
+      - name: Install Godot (standard) + export templates
+        env:
+          GODOT_VERSION: 4.6.0
+        run: |
+          set -e
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+
+          unzip -q "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q "Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+
+          godot --version
+
+      - name: Export Web
+        # Tu proyecto está dentro de esta carpeta, según tu captura
+        working-directory: "Antigravity - HobH"
+        run: |
+          set -e
+          mkdir -p ../dist
+          godot --headless --verbose --path . --export-release "Web" ../dist/index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
