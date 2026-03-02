@@ -28,20 +28,20 @@ jobs:
       # IMPORTANT: Use NON-.NET Godot build + templates
       - name: Install Godot (standard) + export templates
         env:
-          GODOT_VERSION: 4.6.0
+          GODOT_VERSION: 4.6
         run: |
           set -e
           wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-
+          
           unzip -q "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q "Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-
+          
           sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
-
+          
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
-
+          
           godot --version
 
       - name: Export Web
