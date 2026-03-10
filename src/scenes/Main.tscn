@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://bgbsm2gq6gga1" path="res://src/scripts/BulletPool.gd" id="2_pool"]
 [ext_resource type="Script" uid="uid://ciwp81vpv1ssw" path="res://src/scripts/Player.gd" id="3_player"]
 [ext_resource type="Texture2D" uid="uid://bsv22eigbimed" path="res://src/assets/white_sq.png.png" id="4_1hqvy"]
+[ext_resource type="PackedScene" path="res://src/scenes/Totem.tscn" id="5_totem"]
+[ext_resource type="PackedScene" path="res://src/scenes/Obstacle.tscn" id="6_obstacle"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1hqvy"]
 radius = 20.0
@@ -13,6 +15,33 @@ radius = 20.0
 
 [node name="Main" type="Node2D" unique_id=1467517605]
 script = ExtResource("1_main")
+
+[node name="Map" type="Node2D" parent="." unique_id=987654300]
+
+[node name="Obstacles" type="Node2D" parent="Map" unique_id=987654301]
+
+[node name="ObstacleCenter" parent="Map/Obstacles" unique_id=987654302 instance=ExtResource("6_obstacle")]
+position = Vector2(600, 350)
+scale = Vector2(1.3, 1)
+
+[node name="ObstacleLeft" parent="Map/Obstacles" unique_id=987654303 instance=ExtResource("6_obstacle")]
+position = Vector2(300, 480)
+scale = Vector2(0.5, 1.4)
+
+[node name="ObstacleRight" parent="Map/Obstacles" unique_id=987654304 instance=ExtResource("6_obstacle")]
+position = Vector2(900, 480)
+scale = Vector2(0.5, 1.4)
+
+[node name="Totems" type="Node2D" parent="." unique_id=12345600]
+
+[node name="Totem1" parent="Totems" unique_id=12345601 instance=ExtResource("5_totem")]
+position = Vector2(300, 150)
+
+[node name="Totem2" parent="Totems" unique_id=12345602 instance=ExtResource("5_totem")]
+position = Vector2(600, 150)
+
+[node name="Totem3" parent="Totems" unique_id=12345603 instance=ExtResource("5_totem")]
+position = Vector2(900, 150)
 
 [node name="BulletPool" type="Node" parent="." unique_id=2136551591]
 script = ExtResource("2_pool")
@@ -38,6 +67,7 @@ position = Vector2(18, 0)
 [node name="Player2" type="CharacterBody2D" parent="Players" unique_id=1374073631]
 position = Vector2(900, 350)
 script = ExtResource("3_player")
+player_class = 1
 player_id = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player2" unique_id=210921206]

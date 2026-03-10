@@ -4,10 +4,26 @@ class_name Player
 signal request_bullet(spawn_position: Vector2, direction: Vector2, shooter_id: int)
 signal player_died(victim_id: int, killer_id: int)
 
+enum PlayerClass {
+	MANTIS,
+	FLY
+}
+
+@export var player_class: PlayerClass = PlayerClass.MANTIS
 @export var player_id: int = 1
 @export var move_speed: float = 260.0
 @export var turn_speed: float = 16.0
 @export var shoot_cooldown: float = 0.18
+
+# Melee config
+@export var melee_range: float = 80.0
+@export var melee_damage: int = 35
+@export var melee_cooldown: float = 0.8
+
+# Dash config
+@export var dash_duration: float = 0.15
+@export var dash_speed_mult: float = 3.5
+@export var dash_cooldown: float = 2.0
 
 @export var max_health: int = 100
 
@@ -16,6 +32,10 @@ signal player_died(victim_id: int, killer_id: int)
 var current_health: int
 var _aim_dir: Vector2 = Vector2.RIGHT
 var _cooldown_left: float = 0.0
+var _dash_timer: float = 0.0
+var _dash_cooldown_left: float = 0.0
+var _dash_dir: Vector2 = Vector2.RIGHT
+
 var spawn_position: Vector2
 var is_dead: bool = false
 
@@ -35,11 +55,16 @@ func _ready() -> void:
 			break
 
 func _physics_process(delta: float) -> void:
-	_update_move(delta)
+	_dash_timer = maxf(0.0, _dash_timer - delta)
+	
+	if _dash_timer > 0.0:
+		velocity = _dash_dir * (move_speed * dash_speed_mult)
+		move_and_slide()
+	else:
+		_update_move(delta)
+		
 	_update_aim(delta)
-	_update_shoot(delta)
-	if Input.is_action_just_pressed(_action("aim_left")): print(player_id, " aim_left")
-	if Input.is_action_just_pressed(_action("move_left")): print(player_id, " move_left")
+	_update_actions(delta)
 
 func _update_move(_delta: float) -> void:
 	var input_dir := Vector2(
@@ -64,15 +89,46 @@ func _update_aim(delta: float) -> void:
 		_aim_dir = _aim_dir.lerp(aim_input, clamp(turn_speed * delta, 0.0, 1.0)).normalized()
 		rotation = _aim_dir.angle()
 
-func _update_shoot(delta: float) -> void:
+func _update_actions(delta: float) -> void:
 	_cooldown_left = maxf(0.0, _cooldown_left - delta)
+	_dash_cooldown_left = maxf(0.0, _dash_cooldown_left - delta)
 
-	if _cooldown_left > 0.0:
-		return
+	if player_class == PlayerClass.FLY:
+		# Shoot
+		if _cooldown_left <= 0.0 and Input.is_action_pressed(_action("shoot")):
+			_cooldown_left = shoot_cooldown
+			emit_signal("request_bullet", _bullet_spawn.global_position, _aim_dir, player_id)
+		
+		# Dash
+		if _dash_cooldown_left <= 0.0 and Input.is_action_just_pressed(_action("ability")):
+			_dash_cooldown_left = dash_cooldown
+			_dash_timer = dash_duration
+			
+			var input_dir := Vector2(
+				Input.get_action_strength(_action("move_right")) - Input.get_action_strength(_action("move_left")),
+				Input.get_action_strength(_action("move_down")) - Input.get_action_strength(_action("move_up"))
+			)
+			if input_dir.length_squared() > 0.0:
+				_dash_dir = input_dir.normalized()
+			else:
+				_dash_dir = _aim_dir
+				
+	elif player_class == PlayerClass.MANTIS:
+		# Melee
+		if _cooldown_left <= 0.0 and Input.is_action_pressed(_action("shoot")):
+			_cooldown_left = melee_cooldown
+			_perform_melee()
 
-	if Input.is_action_pressed(_action("shoot")):
-		_cooldown_left = shoot_cooldown
-		emit_signal("request_bullet", _bullet_spawn.global_position, _aim_dir, player_id)
+func _perform_melee() -> void:
+	if not get_parent(): return
+	var players = get_parent().get_children()
+	for p in players:
+		if p != self and p is Player and not p.is_dead:
+			var dist = global_position.distance_to(p.global_position)
+			if dist <= melee_range:
+				var dir_to_target = (p.global_position - global_position).normalized()
+				if _aim_dir.dot(dir_to_target) > 0.5: # frontal arc
+					p.take_damage(melee_damage, player_id)
 
 func take_damage(amount: int, killer_id: int) -> void:
 	if current_health <= 0:

@@ -1,8 +1,9 @@
 extends Node2D
 class_name Main
 
-@export var win_score: int = 3
+@export var win_score: int = 15 # Aumentado para el MVP del tótem (estaba en 3)
 
+@onready var totems_container: Node2D = $Totems
 @onready var bullet_pool: BulletPool = $BulletPool
 @onready var player1: Player = $Players/Player1
 @onready var player2: Player = $Players/Player2
@@ -22,6 +23,11 @@ func _ready() -> void:
 	player1.player_died.connect(_on_player_died)
 	player2.player_died.connect(_on_player_died)
 	
+	if totems_container:
+		for child in totems_container.get_children():
+			if child is Totem:
+				child.totem_point_awarded.connect(_on_totem_point_awarded)
+	
 	_update_ui()
 
 func _input(event: InputEvent) -> void:
@@ -31,6 +37,21 @@ func _input(event: InputEvent) -> void:
 func _on_player_request_bullet(spawn_position: Vector2, direction: Vector2, shooter_id: int) -> void:
 	if game_over: return
 	bullet_pool.spawn_bullet(spawn_position, direction, shooter_id)
+
+func _on_totem_point_awarded(player_id: int) -> void:
+	if game_over: return
+	
+	if player_id == 1:
+		score_p1 += 1
+	elif player_id == 2:
+		score_p2 += 1
+		
+	_update_ui()
+	
+	if score_p1 >= win_score:
+		_end_match(1)
+	elif score_p2 >= win_score:
+		_end_match(2)
 
 func _on_player_died(_victim_id: int, killer_id: int) -> void:
 	if game_over: return
@@ -74,6 +95,11 @@ func _reset_match() -> void:
 	if winner_label:
 		winner_label.visible = false
 	_update_ui()
+	
+	if totems_container:
+		for child in totems_container.get_children():
+			if child is Totem:
+				child.reset_totem()
 	
 	# Clear bullets
 	for bullet in bullet_pool.pool:

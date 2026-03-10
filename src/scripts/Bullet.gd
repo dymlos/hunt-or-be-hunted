@@ -52,6 +52,8 @@ func _on_body_entered(body: Node2D) -> void:
 			return # Don't hit ourselves
 		body.take_damage(damage, _shooter_id)
 		_request_deactivate()
+	else:
+		_request_deactivate() # Hit an obstacle or wall
 	
 func _request_deactivate():
 	call_deferred("_deactivate")

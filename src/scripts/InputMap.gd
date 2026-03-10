@@ -16,6 +16,9 @@ static func ensure_actions() -> void:
 
 	# Player 1 shoot
 	_ensure_key_action("p1_shoot", KEY_SPACE)
+	
+	# Player 1 ability
+	_ensure_key_action("p1_ability", KEY_SHIFT)
 
 	# Player 2 movement (Arrows)
 	_ensure_key_action("p2_move_up", KEY_UP)
@@ -31,6 +34,9 @@ static func ensure_actions() -> void:
 
 	# Player 2 shoot
 	_ensure_key_action("p2_shoot", KEY_ENTER)
+	
+	# Player 2 ability
+	_ensure_key_action("p2_ability", KEY_KP_0)
 
 static func _ensure_key_action(action_name: String, keycode: Key) -> void:
 	if not InputMap.has_action(action_name):
